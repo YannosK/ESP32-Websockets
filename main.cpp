@@ -22,9 +22,15 @@ ARTINA
 void ConnectToWiFi(const char* WIFI_NETWORK, const char* WIFI_PASSWORD);
 void ServerInitialize();
 
-WebServer server(80); //creating a server instance with port 80
-//here you need to add a whole HTML code compressed to a string. ALWAYS USE '' NOT "" IN THE HTML CODE
-String webpage = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Lets generate a random number</h1><p>The random number is: </p></span></body></html>";
+WebServer server(80);
+//now we have to split the HTML string in order to add output 
+String webpage_pre_output = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Lets generate a random number</h1><p>The random number is:";
+String webpage_post_output = " </p></span></body></html>";
+String webpage = webpage_pre_output + String(random(100)) + webpage_post_output;
+
+//creating counter-timer variables
+int interval = 1000;
+unsigned long previousMillis = 0;
 
 int status = WL_IDLE_STATUS;
 
@@ -36,8 +42,6 @@ void setup() {
   char WiFi_ssid[32] = "BS_AP_Z_5_3";
   char WiFi_pswd[32]= "kalosavvatokiriako2023";
 
-  //WifiCredentialsViaSerial(WiFi_ssid, WiFi_pswd);
-
   ConnectToWiFi(WiFi_ssid, WiFi_pswd);
 
   ServerInitialize();
@@ -47,6 +51,12 @@ void setup() {
 
 void loop() {
   server.handleClient();
+  unsigned long now = millis();
+  if(now - previousMillis > interval)
+  {
+    webpage = webpage_pre_output + String(random(100)) + webpage_post_output;
+    previousMillis = now;
+  }
 }
 
 
@@ -75,17 +85,10 @@ void ConnectToWiFi(const char* WIFI_NETWORK, const char* WIFI_PASSWORD) {
 
 void ServerInitialize()
 {
-  //initialization
   server.on
   (
-    // "/" defines the root folder
-    // with [] and () you will not refer to a function
     "/", [] () 
     {
-      // now you tell the server what to do in case someone connects to it
-      // 200 is the HTTP response code
-      // then sends a string as in indication, via html
-      // then you add the actual html as a variable
       server.send(200, "text/html", webpage);
     }
   );

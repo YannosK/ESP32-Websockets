@@ -47,9 +47,7 @@ void setup() {
 
 
 void loop() {
-  Serial.print("\nIP address: ");
-  Serial.println(WiFi.localIP());
-  delay(1000);
+  server.handleClient();
 }
 
 

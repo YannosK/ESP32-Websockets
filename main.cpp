@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <WebServer.h>
 
 /*
 BON STUDIO
@@ -20,8 +21,14 @@ ARTINA
 
 void ConnectToWiFi(const char* WIFI_NETWORK, const char* WIFI_PASSWORD);
 void WifiCredentialsViaSerial(char WiFi_network[], char WiFi_password[]);
+void ServerInitialize();
+
+WebServer server(80); //creating a server instance with port 80
+//here you need to add a whole HTML code compressed to a string. ALWAYS USE '' NOT "" IN THE HTML CODE
+String webpage = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Lets generate a random number</h1><p>The random number is: </p></span></body></html>";
 
 int status = WL_IDLE_STATUS;
+
 
 
 void setup() {
@@ -33,7 +40,10 @@ void setup() {
   WifiCredentialsViaSerial(WiFi_ssid, WiFi_pswd);
 
   ConnectToWiFi(WiFi_ssid, WiFi_pswd);
+
+  ServerInitialize();
 }
+
 
 
 void loop() {
@@ -41,6 +51,7 @@ void loop() {
   Serial.println(WiFi.localIP());
   delay(1000);
 }
+
 
 
 void ConnectToWiFi(const char* WIFI_NETWORK, const char* WIFI_PASSWORD) {
@@ -62,6 +73,8 @@ void ConnectToWiFi(const char* WIFI_NETWORK, const char* WIFI_PASSWORD) {
     Serial.println(WiFi.localIP()); 
   }
 }
+
+
 
 void WifiCredentialsViaSerial(char WiFi_network[], char WiFi_password[]) {
   Serial.print("\nAdd WiFi SSID: ");
@@ -87,4 +100,26 @@ void WifiCredentialsViaSerial(char WiFi_network[], char WiFi_password[]) {
   pswdString.toCharArray(WiFi_password, 32);
   Serial.print("\nWiFi_password: ");
   Serial.println(WiFi_password);
+}
+
+
+
+void ServerInitialize()
+{
+  //initialization
+  server.on
+  (
+    // "/" defines the root folder
+    // with [] and () you will not refer to a function
+    "/", [] () 
+    {
+      // now you tell the server what to do in case someone connects to it
+      // 200 is the HTTP response code
+      // then sends a string as in indication, via html
+      // then you add the actual html as a variable
+      server.send(200, "text/html", webpage);
+    }
+  );
+
+  server.begin();
 }
